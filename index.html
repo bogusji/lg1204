@@ -51,6 +51,46 @@
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
+      /* โหมดพิมพ์รายงานสรุป 20 สัปดาห์ (A4 แนวนอน) */
+      body.print-report-mode {
+        width: 100% !important;
+      }
+      body.print-report-mode #view-student,
+      body.print-report-mode #view-teacher > div:first-child,
+      body.print-report-mode #view-teacher > div:nth-child(2),
+      body.print-report-mode #report-controls-bar,
+      body.print-report-mode #history-logs-card {
+        display: none !important;
+      }
+      body.print-report-mode #view-teacher,
+      body.print-report-mode #teacher-tab-reports,
+      body.print-report-mode #report-20w-card {
+        display: block !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      body.print-report-mode #report-print-header {
+        display: block !important;
+      }
+      body.print-report-mode #report-print-footer {
+        display: flex !important;
+      }
+      body.print-report-mode #report-20w-table-wrapper {
+        overflow: visible !important;
+      }
+      body.print-report-mode #report-20w-table {
+        width: 100% !important;
+        font-size: 9px !important;
+        border-collapse: collapse !important;
+      }
+      body.print-report-mode #report-20w-table th,
+      body.print-report-mode #report-20w-table td {
+        border: 1px solid #94a3b8 !important;
+        padding: 2.5px 3px !important;
+        position: static !important;
+      }
       #class-status-banner {
         margin-bottom: 6px !important;
         padding: 6px 10px !important;
@@ -494,31 +534,63 @@
 
       <!-- แท็บ 5: รายงาน 20 สัปดาห์ & ประวัติภาพถ่าย -->
       <div id="teacher-tab-reports" class="hidden space-y-6">
-        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+        <div id="report-20w-card" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+          <!-- หัวกระดาษสำหรับสั่งพิมพ์ A4 (ซ่อนบนหน้าจอปกติ) -->
+          <div id="report-print-header" class="hidden border-b-2 border-slate-800 pb-3 mb-3">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <img src="https://i.ibb.co/GQqkFPsY/jaae-PNGTran-small.png" alt="โลโก้โรงเรียนคงคาราม" class="w-11 h-11 object-contain">
+                <div>
+                  <h2 class="font-bold text-base text-slate-900">รายงานสรุปการเข้าใช้งานห้องปฏิบัติการคอมพิวเตอร์ (20 สัปดาห์)</h2>
+                  <p class="text-xs text-slate-600">โรงเรียนคงคาราม • <span id="report-print-sub-info">รายวิชา: ทั้งหมด | ห้องเรียน: ทั้งหมด</span></p>
+                </div>
+              </div>
+              <div class="text-right text-[11px] text-slate-600">
+                <div id="report-print-teacher">ครูผู้สอน: -</div>
+                <div id="report-print-date">วันที่พิมพ์: -</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="report-controls-bar" class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div>
               <h3 class="font-bold text-base text-slate-900">รายงานสรุปการเข้าเรียนครบ 20 สัปดาห์ (W1–W20)</h3>
-              <p class="text-xs text-slate-500">ตรวจสอบจำนวนครั้งการเข้าเรียนรายบุคคลและส่งออกเป็นไฟล์ Excel / CSV</p>
+              <p class="text-xs text-slate-500">ตรวจสอบจำนวนครั้งการเข้าเรียนรายบุคคล ส่งออก Excel / CSV หรือพิมพ์รายงานขนาด A4</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-              <input type="text" id="report-subject-id" placeholder="รหัสวิชา (เช่น ว31105)" class="rounded-xl border border-slate-300 px-3 py-2 text-xs">
-              <input type="text" id="report-classroom" placeholder="ห้อง (เช่น ม.4/1)" class="rounded-xl border border-slate-300 px-3 py-2 text-xs">
-              <button onclick="generate20WeekReport()" class="px-4 py-2 rounded-xl bg-blue-950 text-white text-xs font-semibold">ออกรายงาน</button>
-              <button onclick="exportReportCsv()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1.5">
+              <select id="report-subject-id" onchange="generate20WeekReport()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white min-w-[180px]">
+                <option value="">-- ทุกรายวิชา --</option>
+              </select>
+              <select id="report-classroom" onchange="generate20WeekReport()" class="rounded-xl border border-slate-300 px-3 py-2 text-xs bg-white min-w-[130px]">
+                <option value="">-- ทุกห้องเรียน --</option>
+              </select>
+              <button onclick="generate20WeekReport()" class="px-4 py-2 rounded-xl bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold">ออกรายงาน</button>
+              <button onclick="exportReportCsv()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5">
                 <i data-lucide="download" class="w-3.5 h-3.5"></i> ส่งออก CSV
+              </button>
+              <button onclick="print20WeekReportA4()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 text-xs font-bold flex items-center gap-1.5 shadow-xs">
+                <i data-lucide="printer" class="w-3.5 h-3.5"></i> พิมพ์รายงาน (A4)
               </button>
             </div>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-xs">
+          <div id="report-20w-table-wrapper" class="overflow-x-auto">
+            <table id="report-20w-table" class="w-full text-left border-collapse text-xs">
               <thead id="report-20w-head" class="bg-slate-100 text-slate-700"></thead>
               <tbody id="report-20w-body" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
+
+          <!-- ท้ายกระดาษลงชื่อครูผู้สอนสำหรับสั่งพิมพ์ A4 -->
+          <div id="report-print-footer" class="hidden justify-end pt-6 mt-4 text-xs text-slate-800">
+            <div class="text-center w-64">
+              <p>ลงชื่อ ...................................................... ครูผู้สอน</p>
+              <p class="mt-1">(<span id="report-sign-teacher-name">......................................................</span>)</p>
+            </div>
+          </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+        <div id="history-logs-card" class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 class="font-bold text-base text-slate-900">ประวัติการลงชื่อเข้าใช้งานและหลักฐานภาพถ่าย</h3>
             <div class="flex flex-wrap items-center gap-2">
@@ -1662,6 +1734,7 @@
       if (tab === 'students') renderStudentDirectory();
       if (tab === 'equipment') renderEquipmentGrid();
       if (tab === 'reports') {
+        populateReportFilters();
         generate20WeekReport();
         loadUsageLogs();
       }
@@ -2016,6 +2089,101 @@
         opt.textContent = `สัปดาห์ที่ ${w}`;
         sel.appendChild(opt);
       }
+    }
+
+    async function populateReportFilters() {
+      const subSel = document.getElementById('report-subject-id');
+      const roomSel = document.getElementById('report-classroom');
+      if (!subSel || !roomSel) return;
+
+      const prevSub = subSel.value;
+      const prevRoom = roomSel.value;
+
+      // รวบรวมรหัสวิชาและชื่อวิชาจากตารางเรียนและสถานะคลาสปัจจุบัน
+      const subjectMap = new Map();
+      if (appState.activeSession && appState.activeSession.subjectId) {
+        subjectMap.set(appState.activeSession.subjectId, appState.activeSession.subjectName || '');
+      }
+      (appState.schedules || []).forEach((sc) => {
+        if (sc.subjectId) {
+          subjectMap.set(sc.subjectId, sc.subjectName || subjectMap.get(sc.subjectId) || '');
+        }
+      });
+
+      // รวบรวมรายชื่อห้องเรียนจากรายชื่อนักเรียนและตารางเรียน
+      const roomSet = new Set();
+      if (appState.activeSession && appState.activeSession.classRoom) {
+        roomSet.add(appState.activeSession.classRoom);
+      }
+      (appState.students || []).forEach((st) => {
+        if (st.classRoom) roomSet.add(st.classRoom);
+      });
+      (appState.schedules || []).forEach((sc) => {
+        if (sc.classRoom) roomSet.add(sc.classRoom);
+      });
+
+      // ดึงรหัสวิชาเพิ่มเติมจากประวัติการใช้งานจริงด้วย
+      const histRes = await callServer('getUsageHistory', [{}]);
+      if (histRes && histRes.success && Array.isArray(histRes.logs)) {
+        histRes.logs.forEach((l) => {
+          if (l.subjectId && !subjectMap.has(l.subjectId)) {
+            subjectMap.set(l.subjectId, '');
+          }
+          if (l.classRoom) roomSet.add(l.classRoom);
+        });
+      }
+
+      subSel.innerHTML = '<option value="">-- ทุกรายวิชา --</option>';
+      Array.from(subjectMap.entries()).sort((a, b) => a[0].localeCompare(b[0], 'th')).forEach(([id, name]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = name ? `${id} - ${name}` : id;
+        subSel.appendChild(opt);
+      });
+      if (prevSub && subjectMap.has(prevSub)) subSel.value = prevSub;
+
+      roomSel.innerHTML = '<option value="">-- ทุกห้องเรียน --</option>';
+      Array.from(roomSet).sort((a, b) => a.localeCompare(b, 'th')).forEach((rm) => {
+        const opt = document.createElement('option');
+        opt.value = rm;
+        opt.textContent = rm;
+        roomSel.appendChild(opt);
+      });
+      if (prevRoom && roomSet.has(prevRoom)) roomSel.value = prevRoom;
+    }
+
+    function print20WeekReportA4() {
+      const subSel = document.getElementById('report-subject-id');
+      const roomSel = document.getElementById('report-classroom');
+      const subLabel = subSel.value ? subSel.options[subSel.selectedIndex].text : 'ทุกรายวิชา';
+      const roomLabel = roomSel.value || 'ทุกห้องเรียน';
+
+      document.getElementById('report-print-sub-info').textContent = `รายวิชา: ${subLabel} | ห้องเรียน: ${roomLabel}`;
+      const teacherName = appState.currentTeacher ? appState.currentTeacher.name : '-';
+      document.getElementById('report-print-teacher').textContent = `ครูผู้สอน: ${teacherName}`;
+      document.getElementById('report-sign-teacher-name').textContent = teacherName;
+      document.getElementById('report-print-date').textContent = `วันที่พิมพ์: ${new Date().toLocaleString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })} น.`;
+
+      // สลับตั้งค่าหน้ากระดาษเป็น A4 แนวนอนชั่วคราวสำหรับการพิมพ์ตาราง 20 สัปดาห์
+      const landscapeStyle = document.createElement('style');
+      landscapeStyle.id = 'temp-landscape-print-style';
+      landscapeStyle.textContent = '@media print { @page { size: A4 landscape; margin: 7mm; } }';
+      document.head.appendChild(landscapeStyle);
+
+      document.body.classList.add('print-report-mode');
+      window.print();
+
+      setTimeout(() => {
+        document.body.classList.remove('print-report-mode');
+        const temp = document.getElementById('temp-landscape-print-style');
+        if (temp) temp.remove();
+      }, 300);
     }
 
     async function loadUsageLogs() {
