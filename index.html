@@ -668,6 +668,59 @@
           </div>
         </div>
 
+        <!-- การ์ดจัดการและย้ายโฟลเดอร์หลักเก็บรูปภาพใน Google Drive (เฉพาะ Admin) -->
+        <div class="bg-white rounded-2xl p-5 sm:p-6 border border-blue-200 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-3">
+              <div class="p-3 rounded-xl bg-blue-100 text-blue-900">
+                <i data-lucide="folder-git-2" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-base text-slate-900">จัดการและย้ายโฟลเดอร์หลักเก็บรูปภาพ (Google Drive)</h3>
+                <p class="text-xs text-slate-500">ย้ายโฟลเดอร์รูปภาพยืนยันตัวตนไปยังโฟลเดอร์ปลายทางใน Google Drive โดยลิงก์รูปเดิมทั้งหมดไม่เสีย (สงวนสิทธิ์ Admin)</p>
+              </div>
+            </div>
+            <a id="photo-folder-drive-link" href="https://drive.google.com" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-900 text-xs font-semibold border border-blue-200 inline-flex items-center gap-1.5 shrink-0">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i> เปิดโฟลเดอร์ใน Drive
+            </a>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div>
+              <span class="text-slate-500">โฟลเดอร์หลักปัจจุบัน:</span>
+              <strong id="current-photo-folder-name" class="text-slate-900 ml-1">ภาพถ่ายเข้าใช้งานห้องคอมพิวเตอร์_คงคาราม</strong>
+              <span class="text-slate-400 mx-1.5">•</span>
+              <span class="text-slate-500">ตำแหน่งที่ตั้ง:</span>
+              <strong id="current-photo-folder-parent" class="text-blue-800 ml-1">My Drive (หน้าแรก)</strong>
+            </div>
+            <div class="font-mono text-[11px] text-slate-500">ID: <span id="current-photo-folder-id">-</span></div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
+              <label class="block text-xs font-bold text-slate-800">1. ย้ายโฟลเดอร์หลักนี้ไปไว้ในโฟลเดอร์อื่น (Move Folder)</label>
+              <p class="text-[11px] text-slate-500">วางลิงก์ URL ของโฟลเดอร์ปลายทาง หรือเว้นว่างเพื่อย้ายกลับไปหน้าแรก (My Drive)</p>
+              <div class="flex gap-2">
+                <input type="text" id="move-photo-dest-input" placeholder="วางลิงก์โฟลเดอร์ปลายทาง หรือ Folder ID..." class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                <button onclick="handleMovePhotoFolder()" class="px-4 py-2 rounded-xl bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold shrink-0 flex items-center gap-1">
+                  <i data-lucide="folder-input" class="w-3.5 h-3.5 text-amber-400"></i> ย้ายโฟลเดอร์
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 space-y-2.5">
+              <label class="block text-xs font-bold text-slate-800">2. เปลี่ยนไปใช้โฟลเดอร์หลักใหม่ (Set New Root Folder)</label>
+              <p class="text-[11px] text-slate-500">ใช้กรณีขึ้นปีการศึกษาใหม่และต้องการแยกโฟลเดอร์เก็บภาพถ่ายชุดใหม่แยกต่างหาก</p>
+              <div class="flex gap-2">
+                <input type="text" id="custom-photo-root-input" placeholder="วางลิงก์โฟลเดอร์หลักใหม่ หรือ Folder ID..." class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+                <button onclick="handleSetCustomPhotoRoot()" class="px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 text-xs font-bold shrink-0">
+                  เปลี่ยนโฟลเดอร์หลัก
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- การ์ดสร้างสำรองข้อมูล (Backup) -->
           <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
@@ -905,10 +958,6 @@
 
     function getActiveGoogleClientId() {
       return localStorage.getItem('KONGKARAM_GOOGLE_CLIENT_ID') || '';
-    }
-
-    function getActiveSheetId() {
-      return localStorage.getItem('KONGKARAM_SHEET_ID') || DEFAULT_SHEET_ID;
     }
 
     const mockDatabase = {
@@ -1204,6 +1253,31 @@
           resolve({ success: true, message: 'ทดสอบการเชื่อมต่อสำเร็จ (Sheet ID: ' + (args[0] || getActiveSheetId()) + ')' });
         } else if (fnName === 'updateSystemConfig') {
           resolve({ success: true, message: 'บันทึกการตั้งค่า Spreadsheet ID เรียบร้อยแล้ว' });
+        } else if (fnName === 'getPhotoFolderInfo') {
+          resolve({
+            success: true,
+            folderId: 'root-photo-folder-id',
+            folderName: 'ภาพถ่ายเข้าใช้งานห้องคอมพิวเตอร์_คงคาราม',
+            folderUrl: 'https://drive.google.com',
+            parentName: 'My Drive (หน้าแรก)'
+          });
+        } else if (fnName === 'movePhotoRootFolder') {
+          const dest = args[0] ? 'โฟลเดอร์ปลายทางที่เลือก' : 'My Drive (หน้าแรก)';
+          resolve({
+            success: true,
+            message: 'ย้ายโฟลเดอร์หลักเก็บรูปภาพไปยัง "' + dest + '" เรียบร้อยแล้ว',
+            parentName: dest,
+            folderUrl: 'https://drive.google.com'
+          });
+        } else if (fnName === 'setCustomPhotoRootFolder') {
+          resolve({
+            success: true,
+            message: 'เปลี่ยนโฟลเดอร์หลักเก็บรูปภาพเรียบร้อยแล้ว',
+            folderId: args[0],
+            folderName: 'โฟลเดอร์เก็บรูปภาพใหม่',
+            parentName: 'My Drive',
+            folderUrl: 'https://drive.google.com'
+          });
         }
       }, 200);
     }
@@ -1740,6 +1814,7 @@
       }
       if (tab === 'backup') {
         loadSystemConfigForm();
+        loadPhotoFolderInfo();
         loadBackupHistory();
       }
       lucide.createIcons();
@@ -2395,6 +2470,66 @@
       localStorage.removeItem('KONGKARAM_GOOGLE_CLIENT_ID');
       loadSystemConfigForm();
       showToast('คืนค่าการเชื่อมต่อเริ่มต้นเรียบร้อยแล้ว', 'success');
+    }
+
+    // =========================================================================
+    // ส่วนจัดการและย้ายโฟลเดอร์หลักเก็บรูปภาพใน Google Drive (Admin)
+    // =========================================================================
+    async function loadPhotoFolderInfo() {
+      const res = await callServer('getPhotoFolderInfo');
+      if (res && res.success) {
+        document.getElementById('current-photo-folder-name').textContent = res.folderName || 'ภาพถ่ายเข้าใช้งานห้องคอมพิวเตอร์_คงคาราม';
+        document.getElementById('current-photo-folder-parent').textContent = res.parentName || 'My Drive (หน้าแรก)';
+        document.getElementById('current-photo-folder-id').textContent = res.folderId || '-';
+        const linkEl = document.getElementById('photo-folder-drive-link');
+        if (linkEl && res.folderUrl) linkEl.href = res.folderUrl;
+      }
+    }
+
+    async function handleMovePhotoFolder() {
+      if (appState.currentTeacher?.role !== 'Admin') {
+        showToast('สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นในการย้ายโฟลเดอร์หลัก', 'error');
+        return;
+      }
+      const destInput = document.getElementById('move-photo-dest-input').value.trim();
+      const destLabel = destInput ? 'โฟลเดอร์ปลายทางที่ระบุ' : 'หน้าแรกของ Google Drive (My Drive)';
+
+      openConfirmModal({
+        title: 'ยืนยันการย้ายโฟลเดอร์หลักเก็บรูปภาพ',
+        desc: `ต้องการย้ายโฟลเดอร์หลักเก็บรูปภาพปัจจุบันไปยัง ${destLabel} ใช่หรือไม่? (ลิงก์รูปภาพเดิมทั้งหมดใน Google Sheets จะยังคงเปิดดูได้ตามปกติ)`,
+        btnText: 'ยืนยันการย้ายโฟลเดอร์',
+        isDanger: false,
+        onConfirm: async () => {
+          const res = await callServer('movePhotoRootFolder', [destInput]);
+          if (res.success) {
+            showToast(res.message, 'success');
+            document.getElementById('move-photo-dest-input').value = '';
+            loadPhotoFolderInfo();
+          } else {
+            showToast(res.message, 'error');
+          }
+        }
+      });
+    }
+
+    async function handleSetCustomPhotoRoot() {
+      if (appState.currentTeacher?.role !== 'Admin') {
+        showToast('สงวนสิทธิ์เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นในการเปลี่ยนโฟลเดอร์หลัก', 'error');
+        return;
+      }
+      const newRootInput = document.getElementById('custom-photo-root-input').value.trim();
+      if (!newRootInput) {
+        showToast('กรุณาวางลิงก์ URL หรือ Folder ID ของโฟลเดอร์หลักใหม่', 'warning');
+        return;
+      }
+      const res = await callServer('setCustomPhotoRootFolder', [newRootInput]);
+      if (res.success) {
+        showToast(res.message, 'success');
+        document.getElementById('custom-photo-root-input').value = '';
+        loadPhotoFolderInfo();
+      } else {
+        showToast(res.message, 'error');
+      }
     }
 
     // =========================================================================
