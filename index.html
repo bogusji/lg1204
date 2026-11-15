@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบลงชื่อเข้าใช้งานห้องคอมพิวเตอร์ - โรงเรียนคงคาราม</title>
+  <link rel="icon" type="image/png" href="https://i.ibb.co/GQqkFPsY/jaae-PNGTran-small.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -22,6 +23,54 @@
     .vertical-text {
       writing-mode: vertical-rl;
       text-orientation: mixed;
+    }
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 8mm;
+      }
+      body {
+        background-color: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      header, #toast-container, #btn-print-seating-map, #view-teacher, #modal-checkin, #modal-teacher-login, #modal-change-pin, #modal-confirm-action {
+        display: none !important;
+      }
+      main {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      #view-student {
+        display: block !important;
+      }
+      #class-status-banner {
+        margin-bottom: 8px !important;
+        padding: 8px 12px !important;
+        box-shadow: none !important;
+      }
+      #print-header-meta {
+        display: flex !important;
+      }
+      #seating-map-wrapper {
+        padding: 10px !important;
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        overflow: visible !important;
+      }
+      #seating-map-inner {
+        min-width: 0 !important;
+        width: 100% !important;
+      }
+      #pc-layout-container {
+        gap: 6px !important;
+      }
+      .seat-card {
+        min-height: 54px !important;
+        padding: 4px !important;
+        box-shadow: none !important;
+      }
     }
     ::-webkit-scrollbar {
       width: 6px;
@@ -42,8 +91,8 @@
   <header class="bg-blue-950 text-white shadow-md sticky top-0 z-30">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
       <div class="flex items-center space-x-3">
-        <div class="bg-amber-400 text-blue-950 p-2 rounded-xl shadow-sm">
-          <i data-lucide="monitor" class="w-6 h-6"></i>
+        <div class="bg-white/95 p-1 rounded-xl shadow-sm flex items-center justify-center shrink-0">
+          <img src="https://i.ibb.co/GQqkFPsY/jaae-PNGTran-small.png" alt="โลโก้โรงเรียนคงคาราม" class="w-9 h-9 object-contain">
         </div>
         <div>
           <h1 class="font-bold text-base sm:text-lg leading-tight tracking-wide">ห้องปฏิบัติการคอมพิวเตอร์</h1>
@@ -114,13 +163,21 @@
               <span class="w-3 h-3 rounded-full bg-slate-400 inline-block"></span>
               <span>ชำรุด: <strong id="count-broken" class="text-slate-600">0</strong></span>
             </div>
+            <button id="btn-print-seating-map" onclick="printSeatingMapA4()" class="hidden ml-1 px-3 py-1.5 rounded-lg bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold items-center gap-1.5 shadow-xs transition cursor-pointer" title="พิมพ์ผังการจองขนาด A4">
+              <i data-lucide="printer" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>พิมพ์ผังการจอง (A4)</span>
+            </button>
           </div>
+        </div>
+        <div id="print-header-meta" class="hidden justify-between items-center mt-2 pt-2 border-t border-slate-200 text-[11px] text-slate-600">
+          <span id="print-teacher-name">ผู้สอน: -</span>
+          <span id="print-timestamp">วันที่พิมพ์: -</span>
         </div>
       </div>
 
       <!-- ผังตำแหน่งเครื่องคอมพิวเตอร์ (PC-01 ถึง PC-40) -->
-      <div class="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm overflow-x-auto">
-        <div class="min-w-[680px] relative pr-11">
+      <div id="seating-map-wrapper" class="bg-white rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm overflow-x-auto">
+        <div id="seating-map-inner" class="min-w-[680px] relative pr-11">
           <div class="text-center text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">
             ด้านหลังห้องปฏิบัติการคอมพิวเตอร์
           </div>
@@ -471,6 +528,10 @@
               <label class="block text-xs font-semibold text-slate-700 mb-1">Google Apps Script Web App URL (/exec)</label>
               <input type="text" id="config-script-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono bg-slate-50">
             </div>
+            <div class="lg:col-span-2">
+              <label class="block text-xs font-semibold text-slate-700 mb-1">Google OAuth Client ID (ไม่บังคับ — สำหรับปุ่มล็อกอินด้วยบัญชี Google บน GitHub Pages)</label>
+              <input type="text" id="config-google-client-id" placeholder="เช่น 1234567890-xxxxxxxx.apps.googleusercontent.com" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono bg-slate-50">
+            </div>
           </div>
 
           <div class="flex flex-wrap items-center gap-2 pt-1">
@@ -650,11 +711,11 @@
           <input type="text" id="login-teacher-email" value="Teacher" placeholder="เช่น Teacher หรือ teacher1@kongkaram.ac.th" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN (6 หลัก)</label>
-          <input type="password" id="login-teacher-pin" value="123456" maxlength="6" onkeydown="if(event.key==='Enter') loginWithPin()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono tracking-widest">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN / รหัสผ่าน (รองรับ 4 หลักขึ้นไป)</label>
+          <input type="password" id="login-teacher-pin" value="123456" onkeydown="if(event.key==='Enter') loginWithPin()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono tracking-widest">
         </div>
         <button onclick="loginWithPin()" class="w-full py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-blue-950 font-bold text-sm transition">
-          เข้าสู่ระบบด้วย PIN
+          เข้าสู่ระบบด้วยรหัสผ่าน / PIN
         </button>
       </div>
     </div>
@@ -666,19 +727,19 @@
   <div id="modal-change-pin" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="font-bold text-base text-slate-900">เปลี่ยนรหัส PIN ใหม่</h3>
+        <h3 class="font-bold text-base text-slate-900">เปลี่ยนรหัส PIN / รหัสผ่านใหม่</h3>
         <button onclick="document.getElementById('modal-change-pin').classList.add('hidden')" class="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100">
           <i data-lucide="x" class="w-4 h-4"></i>
         </button>
       </div>
       <div class="space-y-3">
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN เดิม</label>
-          <input type="password" id="pin-old" maxlength="6" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN / รหัสผ่านเดิม</label>
+          <input type="password" id="pin-old" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN ใหม่ (4–6 หลัก)</label>
-          <input type="password" id="pin-new" maxlength="6" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
+          <label class="block text-xs font-semibold text-slate-700 mb-1">รหัส PIN / รหัสผ่านใหม่ (4 ตัวอักษรขึ้นไป)</label>
+          <input type="password" id="pin-new" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm font-mono">
         </div>
       </div>
       <div class="flex gap-2 pt-2">
@@ -699,14 +760,15 @@
         </div>
         <h3 id="confirm-modal-title" class="font-bold text-lg text-slate-900">ยืนยันการดำเนินการ</h3>
       </div>
-      <p id="confirm-modal-desc" class="text-sm text-slate-600 leading-relaxed mb-5">คุณต้องการดำเนินการนี้ใช่หรือไม่?</p>
-      <div class="flex gap-2.5">
+      <p id="confirm-modal-desc" class="text-sm text-slate-600 mb-6 leading-relaxed"></p>
+      <div class="flex gap-2">
         <button onclick="closeConfirmModal()" class="flex-1 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-semibold">ยกเลิก</button>
         <button id="confirm-modal-btn" class="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-semibold">ยืนยัน</button>
       </div>
     </div>
   </div>
 
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script>
     const isGasEnvironment = (typeof google !== 'undefined' && google.script && google.script.run);
     const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzifQz4TUPG1FEmNaCEDRne7OPml2BN1xGMlWEUKJOJ969JIWaL_W8VTRR47ulhnIud/exec';
@@ -714,6 +776,14 @@
 
     function getActiveScriptUrl() {
       return localStorage.getItem('KONGKARAM_SCRIPT_URL') || DEFAULT_SCRIPT_URL;
+    }
+
+    function getActiveSheetId() {
+      return localStorage.getItem('KONGKARAM_SHEET_ID') || DEFAULT_SHEET_ID;
+    }
+
+    function getActiveGoogleClientId() {
+      return localStorage.getItem('KONGKARAM_GOOGLE_CLIENT_ID') || '';
     }
 
     function getActiveSheetId() {
@@ -875,7 +945,7 @@
           resolve({ success: true, message: 'ลงชื่อเข้าใช้งานเครื่อง ' + payload.pcId + ' สำเร็จเรียบร้อย!' });
         } else if (fnName === 'loginTeacher') {
           const cred = args[0];
-          const targetEmail = cred.mode === 'google' ? 'admin@kongkaram.ac.th' : String(cred.email || '').trim().toLowerCase();
+          const targetEmail = String(cred.email || (cred.mode === 'google' ? 'admin@kongkaram.ac.th' : '')).trim().toLowerCase();
           const teacher = mockDatabase.teachers[targetEmail];
           if (!teacher) {
             resolve({ success: false, message: 'ไม่พบบัญชีครูในระบบ' });
@@ -1064,6 +1134,17 @@
       const s = appState.activeSession;
       const isOpen = (s.status === 'OPEN');
 
+      const printBtn = document.getElementById('btn-print-seating-map');
+      if (printBtn) {
+        if (appState.currentTeacher) {
+          printBtn.classList.remove('hidden');
+          printBtn.classList.add('inline-flex');
+        } else {
+          printBtn.classList.add('hidden');
+          printBtn.classList.remove('inline-flex');
+        }
+      }
+
       const banner = document.getElementById('class-status-banner');
       const iconBox = document.getElementById('banner-icon-box');
       const badge = document.getElementById('banner-badge');
@@ -1080,17 +1161,31 @@
         period.textContent = s.period || 'คาบเรียน';
         week.textContent = `สัปดาห์ที่ ${s.week || 1} / 20`;
         subject.textContent = `${s.subjectId} ${s.subjectName}`;
-        detail.textContent = `ระดับชั้น ${s.classRoom} • กดเลือกหมายเลขเครื่องที่นั่งเพื่อลงชื่อและถ่ายภาพ`;
+        detail.textContent = `ระดับชั้น ${s.classRoom} • กดเลือกหมายเลขเครื่องที่นั่งเพื่อลงชื่อและถ่ายภาพยืนยันตัวตน`;
       } else {
         banner.className = 'mb-6 rounded-2xl p-4 sm:p-5 border shadow-sm transition-all bg-slate-100 border-slate-300';
         iconBox.className = 'p-3 rounded-xl bg-slate-200 text-slate-600 shrink-0';
         badge.className = 'px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-600 text-white';
-        badge.textContent = 'ปิดคลาสเรียน';
-        period.textContent = 'รอครูเปิดคลาส';
+        badge.textContent = 'ยังไม่เปิดคลาสเรียน';
+        period.textContent = s.period || 'ปิดห้อง';
         week.textContent = '-';
-        subject.textContent = 'ยังไม่เปิดรับการลงชื่อเข้าใช้งาน';
-        detail.textContent = 'กรุณารอครูผู้สอนกดเปิดคลาสเรียนก่อนทำการจองเครื่องคอมพิวเตอร์';
+        subject.textContent = 'รอครูผู้สอนเปิดคลาสเรียน';
+        detail.textContent = 'ขณะนี้ระบบปิดรับการลงชื่อชั่วคราว กรุณารอครูผู้สอนเปิดคลาสก่อนเริ่มใช้งาน';
       }
+    }
+
+    function printSeatingMapA4() {
+      if (!appState.currentTeacher) return;
+      const nowStr = new Date().toLocaleString('th-TH', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      document.getElementById('print-teacher-name').textContent = `ครูผู้สอน: ${appState.currentTeacher.name} (${appState.currentTeacher.email})`;
+      document.getElementById('print-timestamp').textContent = `พิมพ์เมื่อ: ${nowStr} น.`;
+      window.print();
     }
 
     function renderComputerGrid() {
@@ -1375,13 +1470,59 @@
     }
 
     async function loginWithGoogle() {
+      const clientId = getActiveGoogleClientId();
+
+      // กรณีตั้งค่า Google OAuth Client ID ไว้แล้ว ใช้ Google Identity Services เปิดหน้าต่างเลือกบัญชี Google จริง
+      if (clientId && typeof google !== 'undefined' && google.accounts && google.accounts.oauth2) {
+        const tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'email profile',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+                });
+                const profile = await userInfoRes.json();
+                if (profile && profile.email) {
+                  const res = await callServer('loginTeacher', [{ mode: 'google', email: profile.email }]);
+                  handleLoginResult(res);
+                } else {
+                  showToast('ไม่สามารถอ่านอีเมลจากบัญชี Google ได้', 'error');
+                }
+              } catch (e) {
+                showToast('เกิดข้อผิดพลาดในการยืนยันตัวตนกับ Google', 'error');
+              }
+            }
+          }
+        });
+        tokenClient.requestAccessToken();
+        return;
+      }
+
+      // กรณีไม่ได้ตั้งค่า OAuth Client ID: ลองดึง Session จาก Apps Script ก่อน หากไม่ได้ให้กรอกอีเมล Google ที่ลงทะเบียนไว้ในชีต
       const res = await callServer('loginTeacher', [{ mode: 'google' }]);
-      handleLoginResult(res);
+      if (res.success) {
+        handleLoginResult(res);
+      } else {
+        const typedEmail = document.getElementById('login-teacher-email').value.trim();
+        if (typedEmail && typedEmail.includes('@')) {
+          const emailRes = await callServer('loginTeacher', [{ mode: 'google', email: typedEmail }]);
+          handleLoginResult(emailRes);
+        } else {
+          showToast('กรุณากรอกอีเมล Google ของครูในช่องด้านล่าง แล้วกดปุ่มเข้าสู่ระบบด้วยบัญชี Google อีกครั้ง (หรือให้ Admin ใส่ OAuth Client ID ในหน้าตั้งค่า)', 'warning');
+          document.getElementById('login-teacher-email').focus();
+        }
+      }
     }
 
     async function loginWithPin() {
-      const email = document.getElementById('login-teacher-email').value;
-      const pin = document.getElementById('login-teacher-pin').value;
+      const email = document.getElementById('login-teacher-email').value.trim();
+      const pin = document.getElementById('login-teacher-pin').value.trim();
+      if (!email || !pin) {
+        showToast('กรุณากรอกรหัสผู้ใช้/อีเมล และรหัส PIN', 'error');
+        return;
+      }
       const res = await callServer('loginTeacher', [{ mode: 'pin', email: email, pin: pin }]);
       handleLoginResult(res);
     }
@@ -1393,33 +1534,37 @@
       }
       appState.currentTeacher = res.teacher;
       closeTeacherLoginModal();
-      showToast(`ยินดีต้อนรับ ${res.teacher.name}`, 'success');
+      showToast('ยินดีต้อนรับ ' + res.teacher.name, 'success');
       switchView('teacher');
+      updateClassBanner();
       updateTeacherDashboard();
     }
 
     function logoutTeacher() {
       appState.currentTeacher = null;
       switchView('student');
-      showToast('ออกจากระบบเรียบร้อยแล้ว');
+      updateClassBanner();
+      showToast('ออกจากระบบครูเรียบร้อยแล้ว', 'success');
     }
 
     function switchView(viewName) {
-      const vStudent = document.getElementById('view-student');
-      const vTeacher = document.getElementById('view-teacher');
+      const studentView = document.getElementById('view-student');
+      const teacherView = document.getElementById('view-teacher');
       const btnStudent = document.getElementById('btn-nav-student');
+      const navTeacherLabel = document.getElementById('nav-teacher-label');
 
       if (viewName === 'teacher') {
-        vStudent.classList.add('hidden');
-        vTeacher.classList.remove('hidden');
+        studentView.classList.add('hidden');
+        teacherView.classList.remove('hidden');
         btnStudent.classList.remove('hidden');
-        document.getElementById('nav-teacher-label').textContent = appState.currentTeacher ? appState.currentTeacher.name : 'แดชบอร์ดครู';
+        navTeacherLabel.textContent = appState.currentTeacher ? appState.currentTeacher.name : 'แดชบอร์ดครู';
       } else {
-        vTeacher.classList.add('hidden');
-        vStudent.classList.remove('hidden');
+        teacherView.classList.add('hidden');
+        studentView.classList.remove('hidden');
         btnStudent.classList.add('hidden');
-        document.getElementById('nav-teacher-label').textContent = appState.currentTeacher ? 'กลับหน้าแดชบอร์ดครู' : 'สำหรับครู / ผู้ดูแล';
+        navTeacherLabel.textContent = appState.currentTeacher ? 'แดชบอร์ดครู' : 'สำหรับครู / ผู้ดูแล';
       }
+      lucide.createIcons();
     }
 
     function switchTeacherTab(tab) {
@@ -1633,7 +1778,7 @@
       const oldPin = document.getElementById('pin-old').value.trim();
       const newPin = document.getElementById('pin-new').value.trim();
       if (!oldPin || newPin.length < 4) {
-        showToast('กรุณากรอกรหัส PIN เดิมและรหัสใหม่ให้ครบถ้วน', 'error');
+        showToast('กรุณากรอกรหัสผ่านเดิม และตั้งรหัสผ่านใหม่อย่างน้อย 4 ตัวอักษร', 'error');
         return;
       }
       const res = await callServer('updateTeacherPin', [appState.currentTeacher.email, oldPin, newPin]);
@@ -1937,8 +2082,10 @@
     function loadSystemConfigForm() {
       const sheetInput = document.getElementById('config-sheet-id');
       const urlInput = document.getElementById('config-script-url');
+      const clientInput = document.getElementById('config-google-client-id');
       if (sheetInput) sheetInput.value = getActiveSheetId();
       if (urlInput) urlInput.value = getActiveScriptUrl();
+      if (clientInput) clientInput.value = getActiveGoogleClientId();
     }
 
     async function handleTestConnection() {
@@ -1966,6 +2113,7 @@
 
       const newSheetId = document.getElementById('config-sheet-id').value.trim();
       const newScriptUrl = document.getElementById('config-script-url').value.trim();
+      const newClientId = (document.getElementById('config-google-client-id')?.value || '').trim();
 
       if (!newSheetId || !newScriptUrl) {
         showToast('กรุณาระบุทั้ง Google Spreadsheet ID และ Script URL ให้ครบถ้วน', 'warning');
@@ -1974,6 +2122,11 @@
 
       localStorage.setItem('KONGKARAM_SHEET_ID', newSheetId);
       localStorage.setItem('KONGKARAM_SCRIPT_URL', newScriptUrl);
+      if (newClientId) {
+        localStorage.setItem('KONGKARAM_GOOGLE_CLIENT_ID', newClientId);
+      } else {
+        localStorage.removeItem('KONGKARAM_GOOGLE_CLIENT_ID');
+      }
 
       const res = await callServer('updateSystemConfig', [{ spreadsheetId: newSheetId }]);
       if (res.success) {
@@ -1987,6 +2140,7 @@
     function handleResetDefaultConfig() {
       localStorage.removeItem('KONGKARAM_SHEET_ID');
       localStorage.removeItem('KONGKARAM_SCRIPT_URL');
+      localStorage.removeItem('KONGKARAM_GOOGLE_CLIENT_ID');
       loadSystemConfigForm();
       showToast('คืนค่าการเชื่อมต่อเริ่มต้นเรียบร้อยแล้ว', 'success');
     }
