@@ -2245,8 +2245,9 @@
       }
       thead.innerHTML = `
         <tr>
-          <th class="py-2.5 px-3 sticky left-0 bg-slate-100">รหัส</th>
-          <th class="py-2.5 px-3 sticky left-14 bg-slate-100 min-w-[150px]">ชื่อ-นามสกุล</th>
+          <th class="py-2.5 px-2.5 text-center sticky left-0 bg-slate-100 w-12">ที่</th>
+          <th class="py-2.5 px-3 sticky left-12 bg-slate-100">รหัส</th>
+          <th class="py-2.5 px-3 sticky left-28 bg-slate-100 min-w-[150px]">ชื่อ-นามสกุล</th>
           ${weekHeaders}
           <th class="py-2.5 px-3 text-center bg-blue-50 text-blue-900">รวม</th>
         </tr>
@@ -2257,11 +2258,12 @@
       tbody.innerHTML = '';
 
       if (!targetStudents.length) {
-        tbody.innerHTML = '<tr><td colspan="23" class="py-6 text-center text-slate-400">ไม่พบรายชื่อนักเรียนในห้องที่ระบุ</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="24" class="py-6 text-center text-slate-400">ไม่พบรายชื่อนักเรียนในห้องที่ระบุ</td></tr>';
         return;
       }
 
-      targetStudents.forEach((st) => {
+      targetStudents.forEach((st, idx) => {
+        const rowNum = idx + 1;
         const attendedWeeks = new Set();
         logs.forEach((l) => {
           if (l.studentId === st.studentId && l.week) {
@@ -2270,7 +2272,7 @@
         });
 
         let cells = '';
-        const rowExport = { studentId: st.studentId, fullName: st.fullName, classRoom: st.classRoom, weeks: {}, total: attendedWeeks.size };
+        const rowExport = { index: rowNum, studentId: st.studentId, fullName: st.fullName, classRoom: st.classRoom, weeks: {}, total: attendedWeeks.size };
 
         for (let w = 1; w <= 20; w++) {
           const present = attendedWeeks.has(w);
@@ -2285,8 +2287,9 @@
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50';
         tr.innerHTML = `
-          <td class="py-2 px-3 font-mono sticky left-0 bg-white">${st.studentId}</td>
-          <td class="py-2 px-3 font-medium sticky left-14 bg-white">${st.fullName}</td>
+          <td class="py-2 px-2.5 text-center font-mono text-slate-600 sticky left-0 bg-white">${rowNum}</td>
+          <td class="py-2 px-3 font-mono sticky left-12 bg-white">${st.studentId}</td>
+          <td class="py-2 px-3 font-medium sticky left-28 bg-white">${st.fullName}</td>
           ${cells}
           <td class="py-2 px-3 text-center font-bold text-blue-900 bg-blue-50/50">${attendedWeeks.size}/20</td>
         `;
@@ -2303,13 +2306,13 @@
       const subId = document.getElementById('report-subject-id').value.trim() || 'All';
       const room = document.getElementById('report-classroom').value.trim() || 'All';
 
-      const headers = ['รหัสนักเรียน', 'ชื่อ-นามสกุล', 'ห้องเรียน'];
+      const headers = ['ลำดับที่', 'รหัสนักเรียน', 'ชื่อ-นามสกุล', 'ห้องเรียน'];
       for (let w = 1; w <= 20; w++) headers.push(`สัปดาห์_${w}`);
       headers.push('รวมเข้าเรียน(ครั้ง)');
 
       const csvRows = ['\uFEFF' + headers.join(',')];
       appState.lastReportData.forEach((r) => {
-        const line = [`"${r.studentId}"`, `"${r.fullName}"`, `"${r.classRoom}"`];
+        const line = [r.index, `"${r.studentId}"`, `"${r.fullName}"`, `"${r.classRoom}"`];
         for (let w = 1; w <= 20; w++) line.push(r.weeks[w]);
         line.push(r.total);
         csvRows.push(line.join(','));
