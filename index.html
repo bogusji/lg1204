@@ -374,9 +374,14 @@
 
       <!-- แท็บ 4: สถานะเครื่อง / ครุภัณฑ์ -->
       <div id="teacher-tab-equipment" class="hidden bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
-        <div class="border-b border-slate-100 pb-3">
-          <h3 class="font-bold text-base text-slate-900">จัดการสถานะเครื่องคอมพิวเตอร์และครุภัณฑ์ (PC-01 ถึง PC-40)</h3>
-          <p class="text-xs text-slate-500">ปรับสถานะเครื่องชำรุดหรือส่งซ่อม เพื่อปิดรับการจองบนผังที่นั่งของนักเรียนทันที</p>
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="font-bold text-base text-slate-900">จัดการสถานะเครื่องคอมพิวเตอร์และครุภัณฑ์ (PC-01 ถึง PC-40)</h3>
+            <p class="text-xs text-slate-500">ปรับสถานะเครื่องชำรุดหรือส่งซ่อม เพื่อปิดรับการจองบนผังที่นั่งของนักเรียนทันที</p>
+          </div>
+          <button onclick="handleSyncAll40Computers()" class="px-4 py-2 rounded-xl bg-blue-950 hover:bg-blue-900 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0">
+            <i data-lucide="database" class="w-4 h-4 text-amber-400"></i> ซิงค์ครุภัณฑ์ครบ 40 เครื่องลง Sheet
+          </button>
         </div>
         <div id="equipment-manage-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 gap-3"></div>
       </div>
@@ -946,6 +951,8 @@
           const pc = mockDatabase.computers.find((c) => c.pcId === pcId);
           if (pc) pc.status = newStatus;
           resolve({ success: true, message: `อัปเดตสถานะ ${pcId} เป็น "${newStatus}" เรียบร้อย` });
+        } else if (fnName === 'syncAll40ComputersToSheet') {
+          resolve({ success: true, message: 'ซิงค์ข้อมูลครุภัณฑ์ครบทั้ง 40 เครื่องลง Google Sheet เรียบร้อยแล้ว' });
         } else if (fnName === 'backupSpreadsheetNow') {
           const ts = new Date().toISOString().replace('T', '_').slice(0, 19).replace(/:/g, '-');
           const bName = `Backup_ห้องคอมพิวเตอร์_${ts}`;
@@ -1755,6 +1762,16 @@
 
     async function changePcStatus(pcId, newStatus) {
       const res = await callServer('updateComputerStatus', [pcId, newStatus]);
+      if (res.success) {
+        showToast(res.message, 'success');
+        refreshSystem();
+      } else {
+        showToast(res.message, 'error');
+      }
+    }
+
+    async function handleSyncAll40Computers() {
+      const res = await callServer('syncAll40ComputersToSheet');
       if (res.success) {
         showToast(res.message, 'success');
         refreshSystem();
